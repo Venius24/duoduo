@@ -1,12 +1,12 @@
+import { aiConfig } from './env'
+
 export async function aiExplain(context: {
   prompt?: string
   answer?: string
   userAnswer?: string
   explainFallback?: string
 }): Promise<{ text: string; source: 'ai' | 'local' }> {
-  const key = process.env.OPENAI_API_KEY
-  const base = process.env.AI_BASE_URL || 'https://api.openai.com/v1'
-  const model = process.env.AI_MODEL || 'gpt-4o-mini'
+  const { key, base, model } = aiConfig()
 
   const fallback =
     context.explainFallback ||

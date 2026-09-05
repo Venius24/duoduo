@@ -2,12 +2,18 @@ import { NextResponse, type NextRequest } from 'next/server'
 import { z } from 'zod'
 import { attachAuthCookie, signToken } from '@/server/auth'
 import { AuthError, registerUser } from '@/server/services/authService'
+import { guard } from '@/server/http'
+
+const LIMIT = 5
+const WINDOW_MS = 60 * 60 * 1000
 
 const schema = z.object({
   email: z.string().min(3),
   name: z.string().min(2).max(24),
   password: z.string().min(6).max(72),
-  color: z.string().optional()
+  // Цвет попадает в style={{ background }} на странице лиги —
+  // принимаем только hex, чтобы через него нельзя было пропихнуть url(...).
+  color: z.string().regex(/^#[0-9a-fA-F]{6}$/).optional()
 })
 
 const MESSAGES: Record<string, string> = {
@@ -18,6 +24,9 @@ const MESSAGES: Record<string, string> = {
 }
 
 export async function POST(req: NextRequest) {
+  const limited = guard(req, 'register', LIMIT, WINDOW_MS)
+  if (limited) return limited
+
   try {
     const body = schema.parse(await req.json())
     const user = await registerUser(body.email, body.name, body.password, body.color || '#58CC02')
@@ -32,6 +41,7 @@ export async function POST(req: NextRequest) {
     if (e instanceof AuthError) {
       return NextResponse.json({ error: MESSAGES[e.code] || 'Ошибка регистрации' }, { status: 400 })
     }
+    console.error('[register]', e)
     return NextResponse.json({ error: 'Внутренняя ошибка' }, { status: 500 })
   }
 }

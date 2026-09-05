@@ -3,8 +3,9 @@ import { cookies } from 'next/headers'
 import type { NextResponse } from 'next/server'
 import type { User } from '@prisma/client'
 import { db } from './db'
+import { cookieSecure, getJwtSecretKey } from './env'
 
-const SECRET = () => new TextEncoder().encode(process.env.JWT_SECRET || 'dev-secret-change-me')
+const SECRET = getJwtSecretKey
 
 export const AUTH_COOKIE = 'dd_token'
 
@@ -13,11 +14,11 @@ export async function signToken(userId: string): Promise<string> {
 }
 
 export async function attachAuthCookie(res: NextResponse, token: string, req?: Request) {
-  const isHttps = !!req?.url && req.url.startsWith('https')
+  const isHttps = cookieSecure(req)
   res.cookies.set(AUTH_COOKIE, token, {
     httpOnly: true,
     sameSite: 'lax',
-    secure: process.env.COOKIE_SECURE === '1' || isHttps,
+    secure: isHttps,
     path: '/',
     maxAge: 60 * 60 * 24 * 30
   })

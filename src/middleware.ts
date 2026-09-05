@@ -1,13 +1,17 @@
 import { NextResponse, type NextRequest } from 'next/server'
 import { jwtVerify } from 'jose'
+import { getJwtSecretKey } from '@/server/env'
 
 const PROTECTED_PREFIXES = ['/learn', '/lesson', '/review', '/profile', '/leaderboard', '/settings']
 
 async function isAuthed(req: NextRequest): Promise<boolean> {
   const token = req.cookies.get('dd_token')?.value
   if (!token) return false
+  // Ключ берём вне try: неверная конфигурация должна падать явно,
+  // а не выглядеть как «просроченный токен» и молча редиректить на /auth.
+  const key = getJwtSecretKey()
   try {
-    await jwtVerify(token, new TextEncoder().encode(process.env.JWT_SECRET || 'dev-secret-change-me'))
+    await jwtVerify(token, key)
     return true
   } catch {
     return false
