@@ -1,0 +1,28 @@
+# зависимости
+node_modules/
+
+# сборка
+.next/
+out/
+build/
+*.tsbuildinfo
+
+# окружение (в репозиторий едет только .env.example)
+.env
+.env.local
+.env.*.local
+
+# база данных
+prisma/*.db
+prisma/*.db-journal
+prisma/*.db-wal
+prisma/*.db-shm
+
+# служебное
+*.log
+npm-debug.log*
+.DS_Store
+Thumbs.db
+.vercel
+coverage/
+next-env.d.ts

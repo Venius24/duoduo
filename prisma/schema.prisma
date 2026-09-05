@@ -1,0 +1,93 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  name         String
+  passwordHash String
+  role         String   @default("user")
+  color        String   @default("#58CC02")
+  xp           Int      @default(0)
+  gems         Int      @default(500)
+  hearts       Int      @default(5)
+  heartsMax    Int      @default(5)
+  heartsUpdated DateTime @default(now())
+  streak       Int      @default(0)
+  bestStreak   Int      @default(0)
+  lastActive   String?
+  weekKey      String   @default("")
+  weeklyXp     Int      @default(0)
+  dailyGoal    Int      @default(40)
+  sound        Boolean  @default(true)
+  ttsRate      Float    @default(1)
+  activeCourse String   @default("en")
+  createdAt    DateTime @default(now())
+
+  progress     LessonProgress[]
+  srs          SrsItem[]
+  achievements Achievement[]
+  days         DayStat[]
+}
+
+model LessonProgress {
+  id          String    @id @default(cuid())
+  userId      String
+  courseId    String
+  unitId      String
+  lessonId    String
+  stars       Int       @default(0)
+  bestPercent Int       @default(0)
+  attempts    Int       @default(0)
+  completedAt DateTime?
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, courseId, unitId, lessonId])
+}
+
+model SrsItem {
+  id       String   @id @default(cuid())
+  userId   String
+  itemId   String
+  courseId String
+  ease     Float    @default(2.5)
+  interval Int      @default(0)
+  reps     Int      @default(0)
+  lapses   Int      @default(0)
+  dueAt    DateTime @default(now())
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, itemId])
+  @@index([userId, dueAt])
+}
+
+model Achievement {
+  id         String   @id @default(cuid())
+  userId     String
+  code       String
+  unlockedAt DateTime @default(now())
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, code])
+}
+
+model DayStat {
+  id             String @id @default(cuid())
+  userId         String
+  date           String
+  xp             Int    @default(0)
+  lessons        Int    @default(0)
+  correct        Int    @default(0)
+  perfectLessons Int    @default(0)
+  reviews        Int    @default(0)
+  questClaimed   String @default("")
+  user           User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, date])
+}

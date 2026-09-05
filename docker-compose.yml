@@ -1,0 +1,17 @@
+services:
+  duoduo:
+    build: .
+    ports:
+      - '3000:3000'
+    environment:
+      DATABASE_URL: 'file:/app/data/duoduo.db'
+      JWT_SECRET: '${JWT_SECRET:-change-me-to-a-long-random-string}'
+      OPENAI_API_KEY: '${OPENAI_API_KEY:-}'
+      AI_BASE_URL: '${AI_BASE_URL:-https://api.openai.com/v1}'
+      AI_MODEL: '${AI_MODEL:-gpt-4o-mini}'
+    volumes:
+      - duoduo-data:/app/data
+    restart: unless-stopped
+
+volumes:
+  duoduo-data:
