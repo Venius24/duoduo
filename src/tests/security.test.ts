@@ -58,17 +58,18 @@ describe('clientIp', () => {
 describe('getJwtSecret', () => {
   const saved = { ...process.env }
 
+  // NODE_ENV в типах Next помечен readonly, поэтому пишем через каст.
+  const env = process.env as Record<string, string | undefined>
+
   afterEach(() => {
-    process.env.NODE_ENV = saved.NODE_ENV
-    process.env.JWT_SECRET = saved.JWT_SECRET
+    env.NODE_ENV = saved.NODE_ENV
+    env.JWT_SECRET = saved.JWT_SECRET
   })
 
-  // Модуль читает process.env при каждом вызове, но NODE_ENV в Next
-  // типизирован как readonly — присваиваем через каст.
+  // Модуль читает process.env при каждом вызове.
   // Присваивать undefined нельзя: process.env приводит значение к строке
   // и переменная становится литералом "undefined" вместо отсутствующей.
   const setEnv = (nodeEnv: string, secret?: string) => {
-    const env = process.env as Record<string, string | undefined>
     env.NODE_ENV = nodeEnv
     if (secret === undefined) delete env.JWT_SECRET
     else env.JWT_SECRET = secret

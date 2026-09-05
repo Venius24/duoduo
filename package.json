@@ -4,15 +4,22 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "node scripts/set-db-provider.mjs && prisma generate && next build",
     "start": "next start",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
-    "db:push": "prisma db push",
+    "db:provider": "node scripts/set-db-provider.mjs",
+    "db:push": "node scripts/set-db-provider.mjs && prisma db push",
     "db:seed": "tsx prisma/seed.ts",
+    "db:studio": "prisma studio",
+    "gen:secret": "node scripts/gen-secret.mjs",
     "postinstall": "prisma generate",
-    "setup": "npm install && npm run db:push && npm run db:seed"
+    "setup": "npm install && npm run db:push && npm run db:seed",
+    "verify": "npm run typecheck && npm test && npm run build",
+    "docker:up": "docker compose up -d --build",
+    "docker:logs": "docker compose logs -f duoduo",
+    "docker:down": "docker compose down"
   },
   "dependencies": {
     "@prisma/client": "^6.8.2",
@@ -43,5 +50,9 @@
     "tsx": "^4.19.4",
     "typescript": "^5.8.3",
     "vitest": "^3.1.4"
+  },
+  "description": "Игровая платформа для изучения английского и китайского с русского языка.",
+  "engines": {
+    "node": ">=20"
   }
 }

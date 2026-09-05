@@ -1,7 +1,18 @@
+.git
+.github
 node_modules
 .next
+out
+coverage
+
+# секреты и локальные базы в образ не попадают
+.env
+.env.local
+.env.*.local
 *.db
 *.db-journal
-.env.local
-.git
+
+*.log
 npm-debug.log*
+.DS_Store
+README.md
