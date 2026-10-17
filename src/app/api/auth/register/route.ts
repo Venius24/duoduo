@@ -24,13 +24,13 @@ const MESSAGES: Record<string, string> = {
 }
 
 export async function POST(req: NextRequest) {
-  const limited = guard(req, 'register', LIMIT, WINDOW_MS)
+  const limited = await guard(req, 'register', LIMIT, WINDOW_MS)
   if (limited) return limited
 
   try {
     const body = schema.parse(await req.json())
     const user = await registerUser(body.email, body.name, body.password, body.color || '#58CC02')
-    const token = await signToken(user.id)
+    const token = await signToken(user.id, user.tokenVersion)
     const res = NextResponse.json({ ok: true })
     await attachAuthCookie(res, token, req)
     return res

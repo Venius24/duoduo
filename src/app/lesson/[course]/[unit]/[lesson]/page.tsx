@@ -20,12 +20,30 @@ export default function LessonPage() {
   const [attempt, setAttempt] = useState(0)
   const [local, setLocal] = useState<LocalResult | null>(null)
   const [serverResult, setServerResult] = useState<CompleteLessonResult | null>(null)
+  const [attemptId, setAttemptId] = useState<string | null>(null)
 
   const found = findLesson(params.course, params.unit, params.lesson)
+  const exists = !!found
 
   useEffect(() => {
     if (!found) router.replace('/learn')
   }, [found, router])
+
+  // Сервер выдаёт попытку при старте урока: результат принимается только по ней.
+  useEffect(() => {
+    if (!exists || phase !== 'run') return
+    let cancelled = false
+    setAttemptId(null)
+    api<{ attemptId: string }>('/api/lessons/start', {
+      method: 'POST',
+      body: JSON.stringify({ courseId: params.course, unitId: params.unit, lessonId: params.lesson })
+    })
+      .then((r) => !cancelled && setAttemptId(r.attemptId))
+      .catch(() => {})
+    return () => {
+      cancelled = true
+    }
+  }, [exists, phase, attempt, params.course, params.unit, params.lesson])
 
   useEffect(() => {
     if (!data) load()
@@ -37,10 +55,11 @@ export default function LessonPage() {
     setLocal(result)
     setPhase('sending')
     try {
-      if (result.passed || found.lesson.isBoss) {
+      if (attemptId && (result.passed || found.lesson.isBoss)) {
         const res = await api<CompleteLessonResult>('/api/lessons/complete', {
           method: 'POST',
           body: JSON.stringify({
+            attemptId,
             courseId: params.course,
             unitId: params.unit,
             lessonId: params.lesson,

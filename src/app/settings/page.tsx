@@ -58,6 +58,11 @@ export default function SettingsPage() {
     window.location.href = '/'
   }
 
+  const logoutAll = async () => {
+    await api('/api/auth/logout-all', { method: 'POST' }).catch(() => {})
+    window.location.href = '/'
+  }
+
   const resetProgress = async () => {
     setBusy(true)
     try {
@@ -172,6 +177,9 @@ export default function SettingsPage() {
           <div className="flex flex-wrap gap-2.5">
             <Button variant="secondary" size="md" onClick={logout}>
               Выйти из аккаунта
+            </Button>
+            <Button variant="secondary" size="md" onClick={logoutAll}>
+              Выйти на всех устройствах
             </Button>
             <Button variant="danger" size="md" onClick={() => setResetOpen(true)}>
               Сбросить прогресс

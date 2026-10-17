@@ -34,6 +34,8 @@ model User {
   srs          SrsItem[]
   achievements Achievement[]
   days         DayStat[]
+  attempts     LessonAttempt[]
+  tokenVersion Int      @default(0)
 }
 
 model LessonProgress {
@@ -90,4 +92,19 @@ model DayStat {
   user           User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, date])
+}
+
+/// Выданная сервером попытка прохождения урока. Закрывается ровно один раз,
+/// поэтому результат нельзя отправить повторно или придумать «с нуля».
+model LessonAttempt {
+  id         String    @id @default(cuid())
+  userId     String
+  courseId   String
+  unitId     String
+  lessonId   String
+  startedAt  DateTime  @default(now())
+  finishedAt DateTime?
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, startedAt])
 }

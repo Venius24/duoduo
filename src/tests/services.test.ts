@@ -1,13 +1,32 @@
 import { beforeEach, describe, expect, it } from 'vitest'
 import { db } from '@/server/db'
+import { signToken, userFromToken } from '@/server/auth'
 import { AuthError, loginUser, registerUser } from '@/server/services/authService'
+import { AttemptError, startAttempt } from '@/server/services/attempts'
 import { completeLesson } from '@/server/services/lessons'
 import { gradeReview, getDueItems } from '@/server/services/review'
 import { getLeaderboard } from '@/server/services/leaderboard'
 import { buildMePayload, refreshUserState } from '@/server/services/users'
 import { findLesson } from '@/content'
+import type { CompleteLessonInput } from '@/lib/types'
+import type { User } from '@prisma/client'
+
+/** Проходит урок как настоящий клиент: сначала попытка, затем результат. */
+async function playLesson(
+  user: User,
+  input: Omit<CompleteLessonInput, 'attemptId'>,
+  opts: { elapsedMs?: number } = {}
+) {
+  const { attemptId } = await startAttempt(user, input.courseId, input.unitId, input.lessonId)
+  await db.lessonAttempt.update({
+    where: { id: attemptId },
+    data: { startedAt: new Date(Date.now() - (opts.elapsedMs ?? 10 * 60 * 1000)) }
+  })
+  return completeLesson(user, { ...input, attemptId })
+}
 
 async function cleanup() {
+  await db.lessonAttempt.deleteMany()
   await db.achievement.deleteMany()
   await db.dayStat.deleteMany()
   await db.srsItem.deleteMany()
@@ -42,7 +61,7 @@ describe('completeLesson', () => {
     const l = findLesson('en', 'u1', 'l1')!
     const total = l.lesson.exercises.length
 
-    const res = await completeLesson(user, {
+    const res = await playLesson(user, {
       courseId: 'en',
       unitId: 'u1',
       lessonId: 'l1',
@@ -91,8 +110,8 @@ describe('completeLesson', () => {
     const total = l.lesson.exercises.length
     const input = { courseId: 'en', unitId: 'u1', lessonId: 'l1', correct: total - 2, total, seconds: 50 } as const
 
-    const first = await completeLesson(user, input)
-    const second = await completeLesson(user, input)
+    const first = await playLesson(user, input)
+    const second = await playLesson(user, input)
 
     expect(first.firstTime).toBe(true)
     expect(second.firstTime).toBe(false)
@@ -105,7 +124,7 @@ describe('completeLesson', () => {
     const boss = findLesson('en', 'u1', 'boss')!
     const total = 26
 
-    const res = await completeLesson(user, {
+    const res = await playLesson(user, {
       courseId: 'en',
       unitId: 'u1',
       lessonId: 'boss',
@@ -121,7 +140,7 @@ describe('completeLesson', () => {
     const row = await db.lessonProgress.findFirst({ where: { userId: user.id } })
     expect(row).toBeNull()
 
-    const win = await completeLesson(user, {
+    const win = await playLesson(user, {
       courseId: 'en',
       unitId: 'u1',
       lessonId: 'boss',
@@ -138,7 +157,7 @@ describe('SRS review flow', () => {
   it('grade двигает интервалы, провал возвращает слово скоро', async () => {
     const user = await registerUser('srs@mail.ru', 'ЭсЭрЭс', 'secret1', '#444')
     const l = findLesson('zh', 'u1', 'l1')!
-    await completeLesson(user, {
+    await playLesson(user, {
       courseId: 'zh',
       unitId: 'u1',
       lessonId: 'l1',
@@ -229,5 +248,86 @@ describe('refreshUserState: регенерация сердец и смена н
     const refreshed = await refreshUserState(stale)
     expect(refreshed.weeklyXp).toBe(0)
     expect(refreshed.weekKey).not.toBe('1999-W1')
+  })
+})
+
+describe('верификация попытки урока', () => {
+  const base = { courseId: 'en', unitId: 'u1', lessonId: 'l1' }
+
+  async function setup(email: string) {
+    const user = await registerUser(email, 'Проверяемый', 'secret1', '#777')
+    const n = findLesson('en', 'u1', 'l1')!.lesson.exercises.length
+    return { user, n }
+  }
+
+  it('попытка закрывается один раз: повторная отправка отклоняется', async () => {
+    const { user, n } = await setup('replay@mail.ru')
+    const { attemptId } = await startAttempt(user, 'en', 'u1', 'l1')
+    await db.lessonAttempt.update({ where: { id: attemptId }, data: { startedAt: new Date(Date.now() - 600_000) } })
+    const input = { ...base, attemptId, correct: n, total: n, seconds: 60 }
+
+    await completeLesson(user, input)
+    await expect(completeLesson(user, input)).rejects.toThrow('ATTEMPT_USED')
+
+    const stat = await db.dayStat.findFirst({ where: { userId: user.id } })
+    expect(stat?.lessons).toBe(1)
+  })
+
+  it('чужая и выдуманная попытки не принимаются', async () => {
+    const { user, n } = await setup('owner@mail.ru')
+    const thief = await registerUser('thief@mail.ru', 'Вор', 'secret1', '#888')
+    const { attemptId } = await startAttempt(user, 'en', 'u1', 'l1')
+    await db.lessonAttempt.update({ where: { id: attemptId }, data: { startedAt: new Date(Date.now() - 600_000) } })
+
+    const input = { ...base, correct: n, total: n, seconds: 60 }
+    await expect(completeLesson(thief, { ...input, attemptId })).rejects.toThrow('ATTEMPT_INVALID')
+    await expect(completeLesson(user, { ...input, attemptId: 'nope' })).rejects.toThrow('ATTEMPT_INVALID')
+    // Попытка на другой урок не подходит для этого.
+    await expect(completeLesson(user, { ...input, lessonId: 'l2', attemptId })).rejects.toThrow('ATTEMPT_INVALID')
+  })
+
+  it('невозможные счёт и скорость отклоняются, прогресс не меняется', async () => {
+    const { user, n } = await setup('cheat@mail.ru')
+
+    // Меньше заданий, чем в уроке — пройти нельзя.
+    await expect(playLesson(user, { ...base, correct: 1, total: 1, seconds: 5 })).rejects.toThrow('SCORE_IMPLAUSIBLE')
+    // Больше, чем допускает очередь с повторами.
+    await expect(playLesson(user, { ...base, correct: 999, total: 999, seconds: 60 })).rejects.toThrow('SCORE_IMPLAUSIBLE')
+    // Физически нереальная скорость: весь урок за секунду.
+    await expect(playLesson(user, { ...base, correct: n, total: n, seconds: 1 }, { elapsedMs: 1000 })).rejects.toThrow(
+      AttemptError
+    )
+
+    expect(await db.lessonProgress.count({ where: { userId: user.id } })).toBe(0)
+  })
+
+  it('просроченная попытка не принимается', async () => {
+    const { user, n } = await setup('stale@mail.ru')
+    await expect(
+      playLesson(user, { ...base, correct: n, total: n, seconds: 60 }, { elapsedMs: 3 * 60 * 60 * 1000 })
+    ).rejects.toThrow('ATTEMPT_INVALID')
+  })
+
+  it('неизвестный урок не получает попытку', async () => {
+    const { user } = await setup('ghost@mail.ru')
+    await expect(startAttempt(user, 'en', 'u1', 'no-such')).rejects.toThrow('LESSON_NOT_FOUND')
+  })
+})
+
+describe('отзыв сессий', () => {
+  it('«выйти везде» делает ранее выданные токены недействительными', async () => {
+    const user = await registerUser('revoke@mail.ru', 'Отзыв', 'secret1', '#999')
+    const old = await signToken(user.id, user.tokenVersion)
+    expect((await userFromToken(old))?.id).toBe(user.id)
+
+    const bumped = await db.user.update({ where: { id: user.id }, data: { tokenVersion: { increment: 1 } } })
+    expect(await userFromToken(old)).toBeNull()
+
+    const fresh = await signToken(bumped.id, bumped.tokenVersion)
+    expect((await userFromToken(fresh))?.id).toBe(user.id)
+  })
+
+  it('мусорный токен не даёт пользователя', async () => {
+    expect(await userFromToken('not.a.jwt')).toBeNull()
   })
 })

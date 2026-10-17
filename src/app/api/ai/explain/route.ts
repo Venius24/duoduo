@@ -19,7 +19,7 @@ export async function POST(req: NextRequest) {
   const user = await getSessionUser()
   if (!user) return NextResponse.json({ error: 'unauthorized' }, { status: 401 })
 
-  const limited = guard(req, `ai:${user.id}`, LIMIT, WINDOW_MS)
+  const limited = await guard(req, `ai:${user.id}`, LIMIT, WINDOW_MS)
   if (limited) return limited
 
   try {

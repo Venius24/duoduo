@@ -6,6 +6,7 @@ import { dateStr, weekKeyStr, yesterdayStr } from '@/lib/utils'
 import type { CompleteLessonInput, CompleteLessonResult } from '@/lib/types'
 import { findLesson } from '@/content'
 import { db } from '../db'
+import { consumeAttempt } from './attempts'
 
 export async function completeLesson(
   user: User,
@@ -16,6 +17,11 @@ export async function completeLesson(
 
   const total = Math.max(1, Math.min(999, Math.floor(input.total)))
   const correct = Math.max(0, Math.min(total, Math.floor(input.correct)))
+
+  // Результат принимается только по попытке, выданной сервером: её нельзя
+  // использовать дважды, подменить урок или «пройти» быстрее, чем физически возможно.
+  await consumeAttempt(user, input, { correct, total })
+
   const percent = Math.round((correct / total) * 100)
   const perfect = correct === total && total > 0
   const isBoss = !!found.lesson.isBoss
@@ -110,23 +116,27 @@ export async function completeLesson(
   ])
 
   const grade = perfect ? 5 : percent >= 60 ? 4 : 3
-  for (const item of found.lesson.items) {
-    const prev = await db.srsItem.findUnique({
-      where: { userId_itemId: { userId: user.id, itemId: item.id } }
-    })
-    if (prev) continue
-    const scheduled = freshSrsState(grade)
-    await db.srsItem.create({
-      data: {
-        userId: user.id,
-        itemId: item.id,
-        courseId: input.courseId,
-        ease: scheduled.ease,
-        interval: scheduled.interval,
-        reps: scheduled.reps,
-        lapses: scheduled.lapses,
-        dueAt: scheduled.dueAt
-      }
+  const knownItems = await db.srsItem.findMany({
+    where: { userId: user.id, itemId: { in: found.lesson.items.map((i) => i.id) } },
+    select: { itemId: true }
+  })
+  const known = new Set(knownItems.map((r) => r.itemId))
+  const fresh = found.lesson.items.filter((item) => !known.has(item.id))
+  if (fresh.length > 0) {
+    await db.srsItem.createMany({
+      data: fresh.map((item) => {
+        const scheduled = freshSrsState(grade)
+        return {
+          userId: user.id,
+          itemId: item.id,
+          courseId: input.courseId,
+          ease: scheduled.ease,
+          interval: scheduled.interval,
+          reps: scheduled.reps,
+          lapses: scheduled.lapses,
+          dueAt: scheduled.dueAt
+        }
+      })
     })
   }
 

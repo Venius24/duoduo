@@ -45,6 +45,7 @@ export interface MePayload {
 }
 
 export interface CompleteLessonInput {
+  attemptId: string
   courseId: string
   unitId: string
   lessonId: string

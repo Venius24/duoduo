@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { z } from 'zod'
-import { clientIp, rateLimit } from './rate-limit'
+import { checkRateLimit, clientIp } from './rate-limit'
 
 /** Ответ 429 с корректным Retry-After. */
 export function tooManyRequests(retryAfter: number) {
@@ -14,8 +14,8 @@ export function tooManyRequests(retryAfter: number) {
  * Проверяет лимит по IP. Возвращает готовый 429-ответ либо null,
  * если запрос можно обрабатывать дальше.
  */
-export function guard(req: Request, scope: string, limit: number, windowMs: number) {
-  const res = rateLimit(`${scope}:${clientIp(req)}`, limit, windowMs)
+export async function guard(req: Request, scope: string, limit: number, windowMs: number) {
+  const res = await checkRateLimit(`${scope}:${clientIp(req)}`, limit, windowMs)
   return res.ok ? null : tooManyRequests(res.retryAfter)
 }
 

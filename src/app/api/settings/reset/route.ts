@@ -10,6 +10,7 @@ export async function POST() {
     db.srsItem.deleteMany({ where: { userId: user.id } }),
     db.dayStat.deleteMany({ where: { userId: user.id } }),
     db.achievement.deleteMany({ where: { userId: user.id } }),
+    db.lessonAttempt.deleteMany({ where: { userId: user.id } }),
     db.user.update({
       where: { id: user.id },
       data: {
