@@ -49,7 +49,7 @@ export function MatchEx({ ex, lang, onChange, seed, ttsRate }: Props) {
     <div>
       <Prompt>Соедини пары</Prompt>
       <div className="grid grid-cols-2 gap-x-4 gap-y-2.5">
-        <div className="flex flex-col gap-2.5">
+        <div data-testid="match-left" className="flex flex-col gap-2.5">
           {left.map((i) => {
             const done = matched.has(i)
             return (
@@ -70,7 +70,7 @@ export function MatchEx({ ex, lang, onChange, seed, ttsRate }: Props) {
             )
           })}
         </div>
-        <div className="flex flex-col gap-2.5">
+        <div data-testid="match-right" className="flex flex-col gap-2.5">
           {right.map((i) => {
             const done = matched.has(i)
             return (

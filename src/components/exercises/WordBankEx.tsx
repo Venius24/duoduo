@@ -37,7 +37,7 @@ export function WordBankEx({ ex, lang, value, onChange, locked, seed }: Props) {
     <div>
       <Prompt note={ex.roman}>{ex.prompt}</Prompt>
 
-      <div className="mb-6 flex min-h-[72px] flex-wrap content-start items-start gap-2 border-y-2 border-dashed border-black/10 py-3 dark:border-white/15">
+      <div data-testid="wordbank-answer" className="mb-6 flex min-h-[72px] flex-wrap content-start items-start gap-2 border-y-2 border-dashed border-black/10 py-3 dark:border-white/15">
         {picked.length === 0 && (
           <span className="text-sm font-semibold text-duo-gray">Нажимай на слова ниже…</span>
         )}
@@ -53,7 +53,7 @@ export function WordBankEx({ ex, lang, value, onChange, locked, seed }: Props) {
         ))}
       </div>
 
-      <div className="flex flex-wrap gap-2">
+      <div data-testid="wordbank-bank" className="flex flex-wrap gap-2">
         {bank.map((w, i) =>
           picked.includes(i) ? (
             <div
