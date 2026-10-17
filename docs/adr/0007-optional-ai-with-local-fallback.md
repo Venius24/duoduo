@@ -20,7 +20,7 @@ turn an outage or a missing key into a broken lesson.
 
 The local text comes from the exercise's own `explainFallback`, falling back to
 a generic message built from the correct answer. The endpoint is rate limited
-per user (ADR 0005).
+per user and IP (ADR 0005).
 
 ## Consequences
 
