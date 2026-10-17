@@ -20,7 +20,12 @@ Node.js 20 or newer. `nvm use` picks the right version from `.nvmrc`.
 npm run verify            # typecheck + tests + production build
 ```
 
-CI runs the same thing plus a Docker image build, and a PR needs it green.
+If you touched the lesson flow, auth or an exercise component, also run the
+browser suite (`npx playwright install chromium` once, then `npm run test:e2e`).
+It plays complete lessons in a real browser against its own `prisma/e2e.db`.
+
+CI runs the same thing plus the e2e suite and a Docker image build, and a PR
+needs it green.
 
 ## Ground rules
 

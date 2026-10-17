@@ -46,18 +46,24 @@ makes it cheap to test (see ADR 0001 and 0002).
 
 ## Request lifecycle: completing a lesson
 
-1. The client finishes a lesson and `POST`s `/api/lessons/complete` with
-   `{ courseId, unitId, lessonId, correct, total, seconds }`.
-2. The handler loads the session user (`getSessionUser`: verify JWT, load row),
-   validates the body with zod and calls `completeLesson`.
-3. `completeLesson` looks the lesson up in the content tree, clamps the numbers,
-   decides pass or fail (bosses have a `passScore`), and computes XP, gems,
+1. When the lesson opens, the client calls `POST /api/lessons/start`; the server
+   stores a `LessonAttempt` and returns its id (ADR 0008).
+2. The client finishes and `POST`s `/api/lessons/complete` with
+   `{ attemptId, courseId, unitId, lessonId, correct, total, seconds }`.
+3. The handler loads the session user (`getSessionUser`: verify JWT, check its
+   token version, load the row), validates the body with zod and calls
+   `completeLesson`.
+4. `completeLesson` looks the lesson up in the content tree and clamps the
+   numbers. `consumeAttempt` then verifies and atomically closes the attempt
+   (owner, lesson, age, plausible `total`, minimum elapsed time).
+5. It decides pass or fail (bosses have a `passScore`) and computes XP, gems,
    stars and the streak.
-4. Counters, per-day stats and lesson progress are written in one
+6. Counters, per-day stats and lesson progress are written in one
    `db.$transaction`.
-5. Words from the lesson that the user has not seen get a first SRS schedule.
-6. Achievements are re-evaluated; newly unlocked ones are inserted.
-7. The result (XP gained, level-up, unlocked achievements) is returned to the UI.
+7. Words from the lesson that the user has not seen get a first SRS schedule,
+   inserted with a single `createMany`.
+8. Achievements are re-evaluated; newly unlocked ones are inserted.
+9. The result (XP gained, level-up, unlocked achievements) is returned to the UI.
 
 ## Data model
 
@@ -67,6 +73,7 @@ erDiagram
     User ||--o{ SrsItem : schedules
     User ||--o{ Achievement : unlocks
     User ||--o{ DayStat : accumulates
+    User ||--o{ LessonAttempt : starts
     User {
         string id PK
         string email UK
@@ -76,6 +83,14 @@ erDiagram
         int streak
         int weeklyXp
         string weekKey
+        int tokenVersion
+    }
+    LessonAttempt {
+        string courseId
+        string unitId
+        string lessonId
+        datetime startedAt
+        datetime finishedAt
     }
     LessonProgress {
         string courseId
@@ -120,7 +135,8 @@ the week and are stable between page loads, without storing any extra state.
 
 ## Security surface
 
-See ADR 0003 (sessions and secret), ADR 0005 (rate limits) and
+See ADR 0003 and 0009 (sessions, secret, revocation), ADR 0005 and 0010 (rate
+limits), ADR 0008 (lesson attempts) and
 [SECURITY.md](../SECURITY.md). Response headers are set in `next.config.mjs`,
 and all `/api/*` responses are `Cache-Control: no-store`.
 

@@ -13,7 +13,7 @@ real backend, all in one deployable Next.js app.
 ![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178c6?logo=typescript&logoColor=white)
 ![Next.js](https://img.shields.io/badge/Next.js-15-black?logo=nextdotjs)
 ![Prisma](https://img.shields.io/badge/Prisma-6-2d3748?logo=prisma)
-![Tests](https://img.shields.io/badge/tests-75%20passing-brightgreen)
+![Tests](https://img.shields.io/badge/tests-96%20unit%20%2B%206%20e2e-brightgreen)
 
 </div>
 
@@ -43,12 +43,14 @@ them without reaching for a heavyweight stack.
 | Where does business logic live? | Thin route handlers, a **service layer**, and an I/O-free domain layer | [`src/server/services`](src/server/services), [ADR 0001](docs/adr/0001-service-layer-over-route-handlers.md) |
 | What if someone forgets `JWT_SECRET`? | The app **refuses to start** in production with a missing, short or template secret | [`src/server/env.ts`](src/server/env.ts), [ADR 0003](docs/adr/0003-stateless-jwt-and-fail-fast-secret.md) |
 | SQLite on a VPS, Postgres on Vercel? | One schema, provider switched at build time | [`scripts/set-db-provider.mjs`](scripts/set-db-provider.mjs), [ADR 0004](docs/adr/0004-switchable-database-provider.md) |
-| Brute-forcing the login | Sliding-window limiter, `429` with `Retry-After` | [`src/server/rate-limit.ts`](src/server/rate-limit.ts), [ADR 0005](docs/adr/0005-in-memory-rate-limiter.md) |
+| Brute-forcing the login | Sliding-window limiter, `429` with `Retry-After`, optional shared Redis store | [`src/server/rate-limit.ts`](src/server/rate-limit.ts), [ADR 0005](docs/adr/0005-in-memory-rate-limiter.md), [ADR 0010](docs/adr/0010-optional-shared-rate-limit-store.md) |
+| Forged lesson scores | Results are accepted only for **server-issued, single-use attempts** with plausibility checks | [`src/server/services/attempts.ts`](src/server/services/attempts.ts), [ADR 0008](docs/adr/0008-server-issued-lesson-attempts.md) |
+| A stolen or lost session | Per-user token version: "sign out everywhere" revokes every JWT | [`src/server/auth.ts`](src/server/auth.ts), [ADR 0009](docs/adr/0009-revocable-sessions-with-token-version.md) |
 | Hearts that regenerate, weekly resets | **Derived from timestamps**, no cron or workers, so it runs on serverless | [`src/server/services/users.ts`](src/server/services/users.ts) |
 | A one-letter typo, or pinyin typed without tone marks | Answer normalisation plus Levenshtein typo tolerance | [`src/lib/normalize.ts`](src/lib/normalize.ts) |
 | Is the AI feature a hard dependency? | No: it **degrades to a local explanation** on any failure | [`src/server/ai.ts`](src/server/ai.ts), [ADR 0007](docs/adr/0007-optional-ai-with-local-fallback.md) |
 
-All seven decisions are written up as
+All ten decisions are written up as
 [Architecture Decision Records](docs/adr/README.md), including the alternatives
 that were rejected and what each choice costs.
 
@@ -136,7 +138,8 @@ npm run dev
 |---|---|
 | `npm run dev` | Dev server |
 | `npm run build` / `npm start` | Production build and server (provider picked automatically) |
-| `npm test` | 75 tests |
+| `npm test` | 96 unit and integration tests |
+| `npm run test:e2e` | Playwright end-to-end suite (needs `npx playwright install chromium` once) |
 | `npm run typecheck` | `tsc --noEmit` |
 | `npm run verify` | Types, tests and build: exactly what CI runs |
 | `npm run db:studio` | Prisma Studio |
@@ -150,6 +153,7 @@ npm run dev
 | `JWT_SECRET` | yes | Session signing secret, 24+ characters |
 | `DATABASE_PROVIDER` | no | `sqlite` or `postgresql`, if auto-detection is wrong |
 | `COOKIE_SECURE` | no | `1` to force the `Secure` cookie flag (needed behind a TLS proxy) |
+| `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN` | no | Shared rate-limit counters for multi-instance or serverless deployments; in-memory otherwise |
 | `OPENAI_API_KEY` | no | Enables AI explanations |
 | `AI_BASE_URL`, `AI_MODEL` | no | Any OpenAI-compatible endpoint and model |
 | `APP_VERSION` | no | Echoed by `/api/health` |
@@ -194,27 +198,33 @@ not reachable.
 
 ## Testing
 
-75 tests across 6 files, run by `npm test` and on every push in CI:
+96 unit and integration tests (Vitest) plus 6 end-to-end tests (Playwright),
+all run on every push in CI:
 
 | File | Covers |
 |---|---|
 | `normalize.test.ts` | Answer normalisation, typo tolerance, pinyin |
 | `core.test.ts` | SM-2, levels and XP, quests, achievements, tones |
-| `content.test.ts` | Structural validity of both courses |
-| `services.test.ts` | **Integration against a real database:** register and login, a full lesson, a failed boss, review intervals, league ordering, idempotent quest rewards, heart regeneration |
-| `security.test.ts` | Rate limiter and secret validation |
+| `content.test.ts` | Structural validity of both courses, including that answers are in the language being taught |
+| `services.test.ts` | **Integration against a real database:** register and login, a full lesson, a failed boss, review intervals, league ordering, idempotent quest rewards, heart regeneration, lesson-attempt verification (replay, foreign, too fast, expired), session revocation |
+| `security.test.ts` | Rate limiter (memory and mocked Redis, with fallback) and secret validation |
+| `speech.test.ts` | Speech recognition always settles (result, error, `onend` or timeout) |
 | `components/exercises.test.tsx` | Exercise UI behaviour |
+| `e2e/lesson-flow.spec.ts` | **Real browser:** register, finish a full English and a full Chinese lesson by solving every exercise from the course content, forged and rushed results rejected, "sign out everywhere", wrong password |
 
-The integration tests use their own `prisma/test.db`, so development data is
-never touched. CI also type-checks, builds for production and builds the Docker
-image.
+The integration tests use their own `prisma/test.db` and the e2e suite its own
+`prisma/e2e.db`, so development data is never touched. The e2e suite starts its
+own dev server on port 3419. CI also type-checks, builds for production and
+builds the Docker image.
 
 ## Security
 
 - bcrypt password hashes; signed JWT in an `httpOnly`, `SameSite=Lax` cookie.
 - Refuses to boot with an unsafe secret.
 - Rate limits: login 10 per 10 minutes, registration 5 per hour, AI 30 per 5
-  minutes.
+  minutes. Per process by default, shared through Redis when configured.
+- Lesson results require a server-issued, single-use attempt.
+- "Sign out on all devices" revokes every issued token.
 - `X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy` and
   `Permissions-Policy` headers; `no-store` on every API response.
 - Every request body is validated with zod.
@@ -226,6 +236,7 @@ Found something? See [SECURITY.md](SECURITY.md).
 ```
 prisma/        schema and seed (demo user, league bots)
 scripts/       DB provider switch, secret generator
+e2e/           Playwright specs and the lesson solver
 docker/        container entrypoint
 docs/          architecture overview and ADRs
 src/
@@ -244,26 +255,31 @@ Adding a unit means adding an object to the `units` array in
 
 Written down on purpose, because they are the honest next steps:
 
-- **Lesson scores are client-reported.** `/api/lessons/complete` clamps and
-  validates the numbers but cannot prove the learner answered correctly. That is
-  acceptable for a personal learning tool; a public leaderboard would need
-  server-side answer verification.
-- **The rate limiter is per process** ([ADR 0005](docs/adr/0005-in-memory-rate-limiter.md)).
-  Multiple instances need a shared store.
-- **No migration history.** Both databases use `prisma db push`. Move to
-  `prisma migrate` before a production upgrade path matters.
-- **JWTs are not revocable** before they expire (30 days); rotating the secret
-  signs everyone out.
-- **No end-to-end browser tests yet.**
+- **Lesson scores are only partly verified.** Results need a server-issued,
+  single-use attempt, a plausible question count and a plausible duration
+  ([ADR 0008](docs/adr/0008-server-issued-lesson-attempts.md)), which stops
+  forging, replay and instant "completions". A patient cheater can still report a
+  perfect score after waiting; grading answers on the server would close that, and
+  would be needed before a public leaderboard.
+- **The Redis rate limiter is untested against a live service.** It is covered
+  against a mocked REST API with fallback, and uses a fixed rather than sliding
+  window ([ADR 0010](docs/adr/0010-optional-shared-rate-limit-store.md)).
+- **No migration history.** Both databases use `prisma db push`. Migrations are
+  provider-specific SQL, which conflicts with the build-time provider switch, so
+  `prisma migrate` needs a decision on how to keep two histories.
+- **Revoking is all-or-nothing**: one user's tokens at once, not one device
+  ([ADR 0009](docs/adr/0009-revocable-sessions-with-token-version.md)).
+- **The interface is Russian only.**
 
 ## Roadmap
 
-- [ ] Server-side answer verification for league integrity
+- [ ] Server-side answer grading for league integrity
 - [ ] `prisma migrate` and a documented upgrade path
-- [ ] Redis-backed rate limiting behind the existing interface
 - [ ] Interface i18n (English UI) and a third course
-- [ ] Playwright end-to-end suite for the lesson flow
-- [ ] Batch the first-time SRS inserts in `completeLesson`
+- [x] Playwright end-to-end suite for the lesson flow
+- [x] Redis-backed rate limiting behind the existing interface
+- [x] Revocable sessions
+- [x] Batch the first-time SRS inserts in `completeLesson`
 
 ## Contributing
 
