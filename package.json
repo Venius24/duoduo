@@ -51,7 +51,26 @@
     "typescript": "^5.8.3",
     "vitest": "^3.1.4"
   },
-  "description": "Игровая платформа для изучения английского и китайского с русского языка.",
+  "description": "Gamified English and Chinese learning platform for Russian speakers: Next.js 15, Prisma, SM-2 spaced repetition.",
+  "license": "MIT",
+  "author": "Venius24",
+  "homepage": "https://github.com/Venius24/duoduo#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Venius24/duoduo.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Venius24/duoduo/issues"
+  },
+  "keywords": [
+    "language-learning",
+    "spaced-repetition",
+    "sm-2",
+    "nextjs",
+    "prisma",
+    "typescript",
+    "gamification"
+  ],
   "engines": {
     "node": ">=20"
   }
