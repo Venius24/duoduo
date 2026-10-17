@@ -25,13 +25,13 @@ const u1c = [
   zh('кто', '谁', 'shéi'),
   zh('это', '这', 'zhè')
 ]
-const s1_1 = sen('你 好 ！', 'Привет!', 'Nǐ hǎo!')
-const s1_2 = sen('你 好 吗 ？', 'Как дела?', 'Nǐ hǎo ma?')
-const s1_3 = sen('我 很 好 ， 谢 谢 ！', 'У меня всё хорошо, спасибо!', 'Wǒ hěn hǎo, xièxie!')
-const s1_4 = sen('我 是 安娜 。', 'Я Анна.', 'Wǒ shì Ānnà.')
-const s1_5 = sen('你 是 谁 ？', 'Кто ты?', 'Nǐ shì shéi?')
-const s1_6 = sen('这 是 什么 ？', 'Что это?', 'Zhè shì shénme?')
-const s1_7 = sen('再 见 ， 朋友 ！', 'До свидания, друг!', 'Zàijiàn, péngyou!')
+const s1_1 = sen('Привет!', '你 好 ！', 'Nǐ hǎo!')
+const s1_2 = sen('Как дела?', '你 好 吗 ？', 'Nǐ hǎo ma?')
+const s1_3 = sen('У меня всё хорошо, спасибо!', '我 很 好 ， 谢 谢 ！', 'Wǒ hěn hǎo, xièxie!')
+const s1_4 = sen('Я Анна.', '我 是 安娜 。', 'Wǒ shì Ānnà.')
+const s1_5 = sen('Кто ты?', '你 是 谁 ？', 'Nǐ shì shéi?')
+const s1_6 = sen('Что это?', '这 是 什么 ？', 'Zhè shì shénme?')
+const s1_7 = sen('До свидания, друг!', '再 见 ， 朋友 ！', 'Zàijiàn, péngyou!')
 
 const u2a = [
   zh('мама', '妈妈', 'māma'),
@@ -51,13 +51,13 @@ const u2b = [
   zh('имя', '名字', 'míngzi'),
   zh('Китай', '中国', 'Zhōngguó')
 ]
-const s2_1 = sen('这 是 我 妈妈 。', 'Это моя мама.', 'Zhè shì wǒ māma.')
-const s2_2 = sen('他 是 我 哥哥 。', 'Он мой старший брат.', 'Tā shì wǒ gēge.')
-const s2_3 = sen('她 是 老师 。', 'Она учитель.', 'Tā shì lǎoshī.')
-const s2_4 = sen('我 是 学生 。', 'Я студент.', 'Wǒ shì xuésheng.')
-const s2_5 = sen('我们 是 朋友 。', 'Мы друзья.', 'Wǒmen shì péngyou.')
-const s2_6 = sen('爸爸 是 医生 。', 'Папа — врач.', 'Bàba shì yīshēng.')
-const s2_7 = sen('你 的 名字 是 什么 ？', 'Как тебя зовут?', 'Nǐ de míngzi shì shénme?')
+const s2_1 = sen('Это моя мама.', '这 是 我 妈妈 。', 'Zhè shì wǒ māma.')
+const s2_2 = sen('Он мой старший брат.', '他 是 我 哥哥 。', 'Tā shì wǒ gēge.')
+const s2_3 = sen('Она учитель.', '她 是 老师 。', 'Tā shì lǎoshī.')
+const s2_4 = sen('Я студент.', '我 是 学生 。', 'Wǒ shì xuésheng.')
+const s2_5 = sen('Мы друзья.', '我们 是 朋友 。', 'Wǒmen shì péngyou.')
+const s2_6 = sen('Папа — врач.', '爸爸 是 医生 。', 'Bàba shì yīshēng.')
+const s2_7 = sen('Как тебя зовут?', '你 的 名字 是 什么 ？', 'Nǐ de míngzi shì shénme?')
 
 const u3a = [
   zh('чай', '茶', 'chá'),
@@ -75,10 +75,10 @@ const u3b = [
   zh('мясо', '肉', 'ròu'),
   zh('яйцо', '鸡蛋', 'jīdàn')
 ]
-const s3_1 = sen('我 想 喝 茶 。', 'Я хочу выпить чаю.', 'Wǒ xiǎng hē chá.')
-const s3_2 = sen('苹果 很 好吃 。', 'Яблоки очень вкусные.', 'Píngguǒ hěn hǎochī.')
-const s3_3 = sen('他 吃 鱼 。', 'Он ест рыбу.', 'Tā chī yú.')
-const s3_4 = sen('我 买 面条 。', 'Я покупаю лапшу.', 'Wǒ mǎi miàntiáo.')
+const s3_1 = sen('Я хочу выпить чаю.', '我 想 喝 茶 。', 'Wǒ xiǎng hē chá.')
+const s3_2 = sen('Яблоки очень вкусные.', '苹果 很 好吃 。', 'Píngguǒ hěn hǎochī.')
+const s3_3 = sen('Он ест рыбу.', '他 吃 鱼 。', 'Tā chī yú.')
+const s3_4 = sen('Я покупаю лапшу.', '我 买 面条 。', 'Wǒ mǎi miàntiáo.')
 const u3c = [
   zh('покупать', '买', 'mǎi'),
   zh('давать', '给', 'gěi'),
@@ -88,8 +88,8 @@ const u3c = [
   zh('сколько денег', '多少钱', 'duōshǎo qián'),
   zh('это', '这个', 'zhège')
 ]
-const s3_5 = sen('请 给 我 一 杯 水 。', 'Дайте мне стакан воды, пожалуйста.', 'Qǐng gěi wǒ yì bēi shuǐ.')
-const s3_6 = sen('这个 多少钱 ？', 'Сколько это стоит?', 'Zhège duōshǎo qián?')
+const s3_5 = sen('Дайте мне стакан воды, пожалуйста.', '请 给 我 一 杯 水 。', 'Qǐng gěi wǒ yì bēi shuǐ.')
+const s3_6 = sen('Сколько это стоит?', '这个 多少钱 ？', 'Zhège duōshǎo qián?')
 
 const u4a = [
   zh('один', '一', 'yī'),
@@ -113,12 +113,12 @@ const u4b = [
   zh('неделя', '星期', 'xīngqī'),
   zh('работать', '工作', 'gōngzuò')
 ]
-const s4_1 = sen('现在 几 点 ？', 'Который час?', 'Xiànzài jǐ diǎn?')
-const s4_2 = sen('现在 三 点 。', 'Сейчас три часа.', 'Xiànzài sān diǎn.')
-const s4_3 = sen('今天 星期一 。', 'Сегодня понедельник.', 'Jīntiān xīngqīyī.')
-const s4_4 = sen('我 明天 工作 。', 'Завтра я работаю.', 'Wǒ míngtiān gōngzuò.')
-const s4_5 = sen('早 上 好 ！', 'Доброе утро!', 'Zǎoshang hǎo!')
-const s4_6 = sen('晚 上 好 ！', 'Добрый вечер!', 'Wǎnshang hǎo!')
+const s4_1 = sen('Который час?', '现在 几 点 ？', 'Xiànzài jǐ diǎn?')
+const s4_2 = sen('Сейчас три часа.', '现在 三 点 。', 'Xiànzài sān diǎn.')
+const s4_3 = sen('Сегодня понедельник.', '今天 星期一 。', 'Jīntiān xīngqīyī.')
+const s4_4 = sen('Завтра я работаю.', '我 明天 工作 。', 'Wǒ míngtiān gōngzuò.')
+const s4_5 = sen('Доброе утро!', '早 上 好 ！', 'Zǎoshang hǎo!')
+const s4_6 = sen('Добрый вечер!', '晚 上 好 ！', 'Wǎnshang hǎo!')
 
 const u5a = [
   zh('здесь', '这里', 'zhèlǐ'),
@@ -143,19 +143,19 @@ const u5c = [
   zh('сверху, на', '上面', 'shàngmiàn'),
   zh('снизу, под', '下面', 'xiàmiàn')
 ]
-const s5_1 = sen('我 在 家 。', 'Я дома.', 'Wǒ zài jiā.')
-const s5_2 = sen('学校 在 哪儿 ？', 'Где школа?', 'Xuéxiào zài nǎr?')
-const s5_3 = sen('妈妈 在 商店 。', 'Мама в магазине.', 'Māma zài shāngdiàn.')
-const s5_4 = sen('我们 去 中国 ！', 'Мы едем в Китай!', 'Wǒmen qù Zhōngguó!')
-const s5_5 = sen('他 来 学校 。', 'Он приходит в школу.', 'Tā lái xuéxiào.')
-const s5_6 = sen('车站 在 前面 。', 'Вокзал впереди.', 'Chēzhàn zài qiánmiàn.')
+const s5_1 = sen('Я дома.', '我 在 家 。', 'Wǒ zài jiā.')
+const s5_2 = sen('Где школа?', '学校 在 哪儿 ？', 'Xuéxiào zài nǎr?')
+const s5_3 = sen('Мама в магазине.', '妈妈 在 商店 。', 'Māma zài shāngdiàn.')
+const s5_4 = sen('Мы едем в Китай!', '我们 去 中国 ！', 'Wǒmen qù Zhōngguó!')
+const s5_5 = sen('Он приходит в школу.', '他 来 学校 。', 'Tā lái xuéxiào.')
+const s5_6 = sen('Вокзал впереди.', '车站 在 前面 。', 'Chēzhàn zài qiánmiàn.')
 const u5d = [
   zh('кошка', '猫', 'māo'),
   zh('стол', '桌子', 'zhuōzi'),
   zh('книга', '书', 'shū'),
   zh('дорога', '路', 'lù')
 ]
-const s5_7 = sen('猫 在 桌子 下面 。', 'Кот под столом.', 'Māo zài zhuōzi xiàmiàn.')
+const s5_7 = sen('Кот под столом.', '猫 在 桌子 下面 。', 'Māo zài zhuōzi xiàmiàn.')
 
 const u6a = [
   zh('пожалуйста (просьба)', '请', 'qǐng'),
@@ -171,13 +171,13 @@ const u6b = [
   zh('немного', '一点儿', 'yìdiǎnr'),
   zh('китайский язык', '中文', 'Zhōngwén')
 ]
-const s6_1 = sen('对 不 起 ！', 'Извините!', 'Duìbuqǐ!')
-const s6_2 = sen('没 关系 ！', 'Ничего страшного!', 'Méi guānxi!')
-const s6_3 = sen('我 不 明白 。', 'Я не понимаю.', 'Wǒ bù míngbai.')
-const s6_4 = sen('请 说 慢 一点儿 。', 'Говорите, пожалуйста, помедленнее.', 'Qǐng shuō màn yìdiǎnr.')
-const s6_5 = sen('你 会 说 中文 吗 ？', 'Ты говоришь по-китайски?', 'Nǐ huì shuō Zhōngwén ma?')
-const s6_6 = sen('会 ， 我 会 说 一点儿 。', 'Да, я немного говорю.', 'Huì, wǒ huì shuō yìdiǎnr.')
-const s6_7 = sen('我 爱 你 ！', 'Я люблю тебя!', 'Wǒ ài nǐ!')
+const s6_1 = sen('Извините!', '对 不 起 ！', 'Duìbuqǐ!')
+const s6_2 = sen('Ничего страшного!', '没 关系 ！', 'Méi guānxi!')
+const s6_3 = sen('Я не понимаю.', '我 不 明白 。', 'Wǒ bù míngbai.')
+const s6_4 = sen('Говорите, пожалуйста, помедленнее.', '请 说 慢 一点儿 。', 'Qǐng shuō màn yìdiǎnr.')
+const s6_5 = sen('Ты говоришь по-китайски?', '你 会 说 中文 吗 ？', 'Nǐ huì shuō Zhōngwén ma?')
+const s6_6 = sen('Да, я немного говорю.', '会 ， 我 会 说 一点儿 。', 'Huì, wǒ huì shuō yìdiǎnr.')
+const s6_7 = sen('Я люблю тебя!', '我 爱 你 ！', 'Wǒ ài nǐ!')
 
 export const chineseCourse: Course = {
   id: 'zh',
@@ -233,7 +233,7 @@ export const chineseCourse: Course = {
           },
           ...f.choiceNew(u1c),
           ...f.wordbank([s1_5, s1_6]),
-          ...f.typed([sen('我是学生。', 'Я студент.', 'Wǒ shì xuésheng.')]),
+          ...f.typed([sen('Я студент.', '我是学生。', 'Wǒ shì xuésheng.')]),
           ...f.listenTyped([s1_4]),
           ...f.tone([u1c[0], u1c[2], u1c[3], u1b[7]]),
           ...f.match([...u1c.slice(1, 4), u1b[0]])
@@ -278,7 +278,7 @@ export const chineseCourse: Course = {
           ...f.listenChoice(u2a),
           ...f.tone(u2a.slice(0, 4)),
           ...f.wordbank([s2_1]),
-          ...f.typed([sen('这是爸爸。', 'Это папа.', 'Zhè shì bàba.')])
+          ...f.typed([sen('Это папа.', '这是爸爸。', 'Zhè shì bàba.')])
         ]
       },
       {
@@ -318,7 +318,7 @@ export const chineseCourse: Course = {
           ...f.choiceNew(u2b.slice(5, 8)),
           ...f.wordbank([s2_2, s2_7]),
           ...f.listenTyped([s2_1]),
-          ...f.typed([sen('我们是朋友。', 'Мы друзья.', 'Wǒmen shì péngyou.')]),
+          ...f.typed([sen('Мы друзья.', '我们是朋友。', 'Wǒmen shì péngyou.')]),
           ...f.speak([{ t: '我 是 学生 。', ru: 'Я студент.', roman: 'wǒ shì xuésheng' }]),
           ...f.match([...u2a.slice(2, 6)])
         ]
@@ -349,7 +349,7 @@ export const chineseCourse: Course = {
           ...f.choiceRev(u3a.slice(0, 5)),
           ...f.listenChoice(u3a),
           ...f.tone(u3a.slice(0, 5)),
-          ...f.wordbank([sen('我 喝 茶 。', 'Я пью чай.', 'Wǒ hē chá.')])
+          ...f.wordbank([sen('Я пью чай.', '我 喝 茶 。', 'Wǒ hē chá.')])
         ]
       },
       {
@@ -360,7 +360,7 @@ export const chineseCourse: Course = {
           ...f.choiceNew(u3b),
           ...f.listenChoice(u3b.slice(0, 5)),
           ...f.wordbank([s3_2, s3_3]),
-          ...f.typed([sen('我想喝水。', 'Я хочу пить воду.', 'Wǒ xiǎng hē shuǐ.')]),
+          ...f.typed([sen('Я хочу пить воду.', '我想喝水。', 'Wǒ xiǎng hē shuǐ.')]),
           ...f.match(u3b)
         ]
       },
@@ -437,7 +437,7 @@ export const chineseCourse: Course = {
           ...f.choiceNew(u4b.slice(0, 4)),
           ...f.listenChoice(u4b.slice(0, 4)),
           ...f.wordbank([s4_4]),
-          ...f.typed([sen('今天 星期一 。', 'Сегодня понедельник.', 'Jīntiān xīngqīyī.')]),
+          ...f.typed([sen('Сегодня понедельник.', '今天 星期一 。', 'Jīntiān xīngqīyī.')]),
           ...f.tone(u4b.slice(0, 3))
         ]
       },
@@ -449,7 +449,7 @@ export const chineseCourse: Course = {
           ...f.choiceNew(u4b.slice(4, 8)),
           ...f.wordbank([s4_5, s4_6]),
           ...f.listenTyped([s4_1]),
-          ...f.typed([sen('现在三点。', 'Сейчас три часа.', 'Xiànzài sān diǎn.')]),
+          ...f.typed([sen('Сейчас три часа.', '现在三点。', 'Xiànzài sān diǎn.')]),
           ...f.match([...u4b.slice(4, 8)])
         ]
       },
@@ -495,7 +495,7 @@ export const chineseCourse: Course = {
           ...f.choiceNew(u5a),
           ...f.listenChoice(u5a),
           ...f.wordbank([s5_1]),
-          ...f.typed([sen('学校在哪儿？', 'Где школа?', 'Xuéxiào zài nǎr?')]),
+          ...f.typed([sen('Где школа?', '学校在哪儿？', 'Xuéxiào zài nǎr?')]),
           ...f.tone(u5a)
         ]
       },
@@ -589,7 +589,7 @@ export const chineseCourse: Course = {
           ...f.choiceNew(u6b.slice(4, 6)),
           ...f.wordbank([s6_7]),
           ...f.speak([{ t: '我爱你！', ru: 'Я люблю тебя!', roman: 'wǒ ài nǐ' }]),
-          ...f.typed([sen('你是我的朋友。', 'Ты мой друг.', 'Nǐ shì wǒ de péngyou.')]),
+          ...f.typed([sen('Ты мой друг.', '你是我的朋友。', 'Nǐ shì wǒ de péngyou.')]),
           ...f.tone([u6b[4], u6b[5]])
         ]
       },

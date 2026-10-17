@@ -19,6 +19,7 @@ export default defineConfig({
           name: 'node',
           environment: 'node',
           include: ['src/tests/**/*.test.ts'],
+          exclude: ['src/tests/speech.test.ts'],
           setupFiles: ['src/tests/setup.ts'],
           globalSetup: ['src/tests/global-setup.ts'],
           testTimeout: 30000,
@@ -31,7 +32,7 @@ export default defineConfig({
         test: {
           name: 'jsdom',
           environment: 'jsdom',
-          include: ['src/tests/components/**/*.test.tsx'],
+          include: ['src/tests/components/**/*.test.tsx', 'src/tests/speech.test.ts'],
           setupFiles: ['src/tests/dom-setup.ts'],
           testTimeout: 30000
         }

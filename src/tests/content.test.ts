@@ -92,6 +92,24 @@ describe('валидность упражнений', () => {
     }
   })
 
+  it('направление языков: ответы на изучаемом языке, а не по-русски', () => {
+    const cyrillic = /[Ѐ-ӿ]/
+    const cjk = /[一-鿿]/
+    const bad: string[] = []
+    for (const { courseId, unitId, lessonId, ex, idx } of all) {
+      const where = `${courseId}/${unitId}/${lessonId}#${idx}`
+      const answers: string[] = []
+      if (ex.kind === 'wordbank' || ex.kind === 'typed' || ex.kind === 'listen-typed') answers.push(ex.answer)
+      if (ex.kind === 'speak') answers.push(ex.say)
+      if (ex.kind === 'listen-choice' || ex.kind === 'listen-typed') answers.push(ex.speak)
+      for (const a of answers) {
+        if (cyrillic.test(a)) bad.push(`${where}: «${a}» содержит кириллицу`)
+        if (courseId === 'zh' && !cjk.test(a)) bad.push(`${where}: «${a}» без иероглифов`)
+      }
+    }
+    expect(bad).toEqual([])
+  })
+
   it('match: пары уникальны и их минимум 2', () => {
     for (const { ex } of all) {
       if (ex.kind !== 'match') continue
