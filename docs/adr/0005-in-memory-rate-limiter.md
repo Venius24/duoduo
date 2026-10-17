@@ -18,7 +18,7 @@ with a `Retry-After` header, or `null`.
 |---|---|---|
 | login | 10 / 10 min | client IP |
 | register | 5 / hour | client IP |
-| AI explain | 30 / 5 min | user |
+| AI explain | 30 / 5 min | user id + client IP |
 
 Design details worth knowing:
 
