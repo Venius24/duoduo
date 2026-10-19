@@ -11,7 +11,7 @@ flowchart LR
     end
 
     subgraph Next["Next.js server"]
-        MW[middleware.ts<br/>JWT check on page routes]
+        MW[proxy.ts<br/>JWT check on page routes]
         API[Route handlers<br/>src/app/api/*]
         SVC[Services<br/>src/server/services/*]
         LIB[Pure domain logic<br/>src/lib/*]

@@ -1,14 +1,14 @@
 # syntax=docker/dockerfile:1
 
 # ─── 1. зависимости для сборки ─────────────────────────────────────────────
-FROM node:20-alpine AS deps
+FROM node:24-alpine AS deps
 WORKDIR /app
 COPY package.json package-lock.json* ./
 COPY prisma ./prisma
 RUN npm ci --no-audit --no-fund
 
 # ─── 2. сборка приложения ──────────────────────────────────────────────────
-FROM node:20-alpine AS builder
+FROM node:24-alpine AS builder
 WORKDIR /app
 ENV NEXT_TELEMETRY_DISABLED=1
 COPY --from=deps /app/node_modules ./node_modules
@@ -26,7 +26,7 @@ RUN node scripts/set-db-provider.mjs \
 # Контейнеру при старте нужны prisma CLI (применить схему) и tsx (посев).
 # Отдельная стадия вместо копирования кусков node_modules: у prisma есть
 # @prisma/engines, у tsx — esbuild, и выборочное копирование ломает запуск.
-FROM node:20-alpine AS bootdeps
+FROM node:24-alpine AS bootdeps
 WORKDIR /boot
 COPY package.json package-lock.json* ./
 COPY prisma ./prisma
@@ -38,7 +38,7 @@ RUN npm ci --omit=dev --no-audit --no-fund --ignore-scripts \
  && npm cache clean --force
 
 # ─── 4. рантайм ────────────────────────────────────────────────────────────
-FROM node:20-alpine AS runner
+FROM node:24-alpine AS runner
 WORKDIR /app
 
 ENV NODE_ENV=production \
